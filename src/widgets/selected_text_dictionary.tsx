@@ -1,5 +1,7 @@
 import React from 'react';
 import { usePlugin, renderWidget, useTracker, SelectionType } from '@remnote/plugin-sdk';
+import { WordData } from '../models';
+import { PreviewDefinitions } from '../components/PreviewDefinitions';
 
 // Helper to clean the selected text to a single word.
 function cleanSelectedText(s?: string) {
@@ -23,7 +25,8 @@ export function useDebounce<T>(value: T, msDelay: number) {
 
 function SelectedTextDictionary() {
   const plugin = usePlugin();
-  const [wordData, setWordData] = React.useState<string>();
+  // Set wordData type to WordData | null for safety.
+  const [wordData, setWordData] = React.useState<WordData | null>(null);
 
   // Debounce the selected text obtained via useTracker.
   const searchTerm = useDebounce(
@@ -45,15 +48,21 @@ function SelectedTextDictionary() {
         const url = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
         const response = await fetch(url + searchTerm);
         const json = await response.json();
-        setWordData(Array.isArray(json) ? json[0] : undefined);
+        setWordData(Array.isArray(json) ? json[0] : null);
       } catch (e) {
-        console.log('Error getting dictionary info: ', e);
+        console.log('Error getting dictionary info:', e);
       }
     };
     getAndSetData();
   }, [searchTerm]);
 
-  return <pre>{JSON.stringify(wordData, null, 2)}</pre>;
+  return (
+    <div className="min-h-[200px] max-h-[500px] overflow-y-scroll m-4">
+      {wordData && (
+        <PreviewDefinitions wordData={wordData} onSelectDefinition={() => {}} />
+      )}
+    </div>
+  );
 }
 
 renderWidget(SelectedTextDictionary);
