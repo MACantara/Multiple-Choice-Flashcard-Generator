@@ -1,17 +1,16 @@
 {
+  "author": "Michael Angelo Cantara",
+  "name": "Multiple Choice Question Generator",
+  "description": "Generates multiple choice questions in RemNote",
+  "enableOnMobile": false,
+  "id": "multiple-choice-question-generator",
+  "repoUrl": "https://github.com/MACantara/Multiple-Choice-Flashcard-Generator",
   "manifestVersion": 1,
-  "id": "plugin_template",
-  "name": "Plugin Template",
-  "author": "remnote",
-  "repoUrl": "",
   "version": {
     "major": 0,
     "minor": 0,
     "patch": 1
   },
-  "theme": [],
-  "enableOnMobile": false,
-  "description": "",
   "requestNative": false,
   "requiredScopes": [
     {
