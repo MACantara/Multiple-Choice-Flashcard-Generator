@@ -17,5 +17,12 @@
       "type": "All",
       "level": "Read"
     }
+  ],
+  "widgets": [
+    {
+      "id": "sample_widget",
+      "type": "sidebar",
+      "title": "Sample Widget"
+    }
   ]
 }
