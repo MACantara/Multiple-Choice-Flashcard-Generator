@@ -22,6 +22,13 @@ async function onActivate(plugin: ReactRNPlugin) {
     defaultValue: 42,
   });
 
+  await plugin.settings.registerStringSetting({
+    id: 'dictionary root',
+    title: 'Dictionary Root Rem',
+    description: 'The Rem to add words to.',
+    defaultValue: '',
+  });
+
   // A command that inserts text into the editor if focused.
   await plugin.app.registerCommand({
     id: 'editor-command',

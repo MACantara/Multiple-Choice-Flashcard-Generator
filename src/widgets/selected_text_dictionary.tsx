@@ -1,6 +1,6 @@
 import React from 'react';
-import { usePlugin, renderWidget, useTracker, SelectionType } from '@remnote/plugin-sdk';
-import { WordData } from '../models';
+import { usePlugin, renderWidget, useTracker, SelectionType, RNPlugin } from '@remnote/plugin-sdk';
+import { WordData, GroupedDefinition } from '../models';
 import { PreviewDefinitions } from '../components/PreviewDefinitions';
 
 // Helper to clean the selected text to a single word.
@@ -21,6 +21,39 @@ export function useDebounce<T>(value: T, msDelay: number) {
     return () => clearTimeout(handler);
   }, [value, msDelay]);
   return debouncedValue;
+}
+
+// New function to add the selected definition as a Rem.
+async function addSelectedDefinition(plugin: RNPlugin, definition: GroupedDefinition): Promise<void> {
+  const rootRemName = (await plugin.settings.getSetting('dictionary root')) as string;
+  if (!rootRemName) {
+    plugin.app.toast('You need to set the Dictionary Root Rem setting!');
+    return;
+  }
+  const rootRem = await plugin.rem.findByName([rootRemName], null);
+  if (!rootRem) {
+    plugin.app.toast('Failed to find the root rem');
+    return;
+  }
+  const word = `${definition.word} (${definition.partOfSpeech})`;
+  const definitions = definition.meanings
+    .map((meaning) => meaning.definitions.map((def) => def.definition))
+    .flat();
+  const wordRem = await plugin.rem.createRem();
+  if (wordRem) {
+    await wordRem.setText([word]);
+    for (const def of definitions) {
+      const child = await plugin.rem.createRem();
+      await child?.setText([def]);
+      await child?.setParent(wordRem._id);
+      await child?.setIsCardItem(true);
+    }
+    await wordRem.setParent(rootRem._id);
+    await wordRem.setPracticeDirection('both');
+    plugin.app.toast('Added!');
+  } else {
+    plugin.app.toast('Failed to save the word to your knowledge base.');
+  }
 }
 
 function SelectedTextDictionary() {
@@ -59,7 +92,7 @@ function SelectedTextDictionary() {
   return (
     <div className="min-h-[200px] max-h-[500px] overflow-y-scroll m-4">
       {wordData && (
-        <PreviewDefinitions wordData={wordData} onSelectDefinition={() => {}} />
+        <PreviewDefinitions wordData={wordData} onSelectDefinition={(d) => addSelectedDefinition(plugin, d)} />
       )}
     </div>
   );
